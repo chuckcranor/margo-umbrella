@@ -99,10 +99,11 @@ endif ()
 message (STATUS "CCI ibverbs setting: ${ibv}")
 
 GenDownloadConfig (cci_download cci cci-2.0.tar.gz
-    ###URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
-    ###URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
+    # XXX: cci currently not compiling, see github issue 45
+    URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
+    URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
     ###TIMEOUT 10
-    GIT_REPOSITORY "https://github.com/CCI/cci"
+    ### GIT_REPOSITORY "https://github.com/CCI/cci"
     ### GIT_TAG master
 )
 
