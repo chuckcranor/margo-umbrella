@@ -1,4 +1,4 @@
-# extern-umbrella
+# margo-umbrella
 
 A framework for downloading, configuring, compiling, and installing 
 all the external libraries we use.  Uses cmake's ExternalProject module.
@@ -6,7 +6,7 @@ all the external libraries we use.  Uses cmake's ExternalProject module.
 Requirements: a compiler with standard build tools ("make"), internet
 access to github.com, git, autotools, and cmake (3.0 or newer).
 
-To build deltafs and install it in a directory (e.g. /tmp/externs):
+To build and install it in a directory (e.g. /tmp/externs):
 
 ```
 mkdir -p build
