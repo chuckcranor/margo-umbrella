@@ -1,11 +1,11 @@
 #
-# CMakeLists.txt  build deltafs and its environment
+# CMakeLists.txt  build margo environment
 # 20-Sep-2016  chuck@ece.cmu.edu
 #
 
 # command line config:
 #
-# -DCMAKE_INSTALL_PREFIX=/tmp/delta       # where to install
+# -DCMAKE_INSTALL_PREFIX=/tmp/margo       # where to install
 #
 
 #
@@ -18,7 +18,7 @@
 #
 
 cmake_minimum_required (VERSION 3.0)
-project (deltafs-umbrella NONE)
+project (margo-umbrella NONE)
 include (ExternalProject)
 
 # hardwire this on for now
@@ -99,10 +99,10 @@ endif ()
 message (STATUS "CCI ibverbs setting: ${ibv}")
 
 GenDownloadConfig (cci_download cci cci-2.0.tar.gz
-    URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
-    URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
-    TIMEOUT 10
-    ### GIT_REPOSITORY "https://github.com/CCI/cci"
+    ###URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
+    ###URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
+    ###TIMEOUT 10
+    GIT_REPOSITORY "https://github.com/CCI/cci"
     ### GIT_TAG master
 )
 
@@ -186,94 +186,6 @@ ExternalProject_Add (mercury
 )
 
 #
-# Snappy (XXX: using tar file, having aclocal issues on nerc)
-#
-GenDownloadConfig (snappy_download snappy snappy-1.1.3.tar.gz
-    URL https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
-    URL_MD5 7358c82f133dc77798e4c2062a749b73
-    TIMEOUT 10
-    ### GIT_REPOSITORY "https://github.com/google/snappy"
-    ### GIT_TAG master
-)
-
-ExternalProject_Add (snappy
-    ${snappy_download}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
-         --prefix=${CMAKE_INSTALL_PREFIX}
-    UPDATE_COMMAND ""
-)
-
-ExternalProject_Add_Step(snappy prepare
-    COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/autogen.sh
-    COMMENT "preparing source for configure"
-    DEPENDEES update
-    DEPENDERS configure
-    WORKING_DIRECTORY <SOURCE_DIR>
-)
-
-#
-# gflags
-#
-GenDownloadConfig (gflags_download gflags gflags.tar.gz
-    GIT_REPOSITORY "https://github.com/gflags/gflags"
-    ### GIT_TAG master
-)
-
-ExternalProject_Add (gflags
-    LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
-    ${gflags_download}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
-               -DBUILD_SHARED_LIBS=ON
-    UPDATE_COMMAND ""
-)
-
-#
-# glog
-#
-GenDownloadConfig (glog_download glog glog.tar.gz
-    GIT_REPOSITORY "https://github.com/google/glog"
-    ### GIT_TAG master
-)
-
-ExternalProject_Add (glog
-    DEPENDS gflags
-    LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
-    ${glog_download}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
-               -DBUILD_SHARED_LIBS=ON
-    UPDATE_COMMAND ""
-)
-
-#
-# nvml
-#
-set (nvmlpatch "${CMAKE_SOURCE_DIR}/patches/nvml-patch")
-if (EXISTS ${nvmlpatch})
-    set (nvmlpatchcmd patch -p1 -i ${nvmlpatch} -d <SOURCE_DIR>)
-endif ()
-
-GenDownloadConfig (nvml_download nvml nvml.tar.gz
-    GIT_REPOSITORY "https://github.com/pmem/nvml"
-    ### GIT_TAG master
-)
-
-ExternalProject_Add (nvml
-    ${nvml_download}
-    PATCH_COMMAND ${nvmlpatchcmd}
-    CONFIGURE_COMMAND ""
-    BUILD_IN_SOURCE 1
-    BUILD_COMMAND make prefix=${CMAKE_INSTALL_PREFIX}
-        COMMAND make prefix=${CMAKE_INSTALL_PREFIX} test
-    INSTALL_COMMAND make prefix=${CMAKE_INSTALL_PREFIX} install
-    # TEST_COMMAND make prefix=${CMAKE_INSTALL_PREFIX} check
-    UPDATE_COMMAND ""
-)
-
-#
 # argobots
 #
 set (argopatch 
@@ -342,7 +254,8 @@ if (EXISTS ${abtspatch})
 endif ()
 
 GenDownloadConfig (abts_download abt-snoozer abt-snoozer.tar.gz
-    GIT_REPOSITORY "git@xgitlab.cels.anl.gov:sds/abt-snoozer.git"
+    GIT_REPOSITORY "https://xgitlab.cels.anl.gov/sds/abt-snoozer.git"
+    ###GIT_REPOSITORY "git@xgitlab.cels.anl.gov:sds/abt-snoozer.git"
     ### GIT_TAG master
 )
 
@@ -369,7 +282,8 @@ ExternalProject_Add_Step(abt-snoozer prepare
 # margo
 #
 GenDownloadConfig (margo_download margo margo.tar.gz
-    GIT_REPOSITORY "git@xgitlab.cels.anl.gov:sds/margo.git"
+    GIT_REPOSITORY "https://xgitlab.cels.anl.gov/sds/margo.git"
+    ### GIT_REPOSITORY "git@xgitlab.cels.anl.gov:sds/margo.git"
     ### GIT_TAG master
 )
 
@@ -383,30 +297,6 @@ ExternalProject_Add(margo
 )
 
 ExternalProject_Add_Step(margo prepare
-    COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/prepare.sh
-    COMMENT "preparing source for configure"
-    DEPENDEES update
-    DEPENDERS configure
-    WORKING_DIRECTORY <SOURCE_DIR>
-)
-
-#
-# bake-bulk
-#
-GenDownloadConfig (bake_download bake-bulk bake-bulk.tar.gz
-    GIT_REPOSITORY "git@xgitlab.cels.anl.gov:sds/bake-bulk.git"
-    ### GIT_TAG master
-)
-
-ExternalProject_Add(bake-bulk
-    DEPENDS margo mercury nvml
-    ${bake_download}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
-        PKG_CONFIG_PATH=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
-    UPDATE_COMMAND ""
-)
-
-ExternalProject_Add_Step(bake-bulk prepare
     COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/prepare.sh
     COMMENT "preparing source for configure"
     DEPENDEES update
